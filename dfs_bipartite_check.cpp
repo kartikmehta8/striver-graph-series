@@ -7,15 +7,30 @@
 
 using namespace std;
 
-bool checkForCycle(int node, int parent, vector<int>& vis, vector<int> adj[]) {
-	vis[node] = 1;
-	for (auto it: adj[node]) {
-		if (!vis[it]) {
-			if (checkForCycle(it, node, vis, adj)) return true;
-		} else if (it != parent) return true;
-	}
+bool bipartite(int node, vector<int> adj[], int color[]) {
 
-	return false;
+	if (color[node] == -1) color[node] = 1;
+
+	for (auto it: adj[node]) {
+		if (color[it] == -1) {
+			color[it] = 1 - color[node];
+
+			if (!bipartite(it, adj, color)) return false;
+		} else if (color[it] == color[node]) return false;
+	}
+	return true;
+}
+
+bool checkBipartiteDFS(vector<int> adj[], int num_of_nodes) {
+	int color[num_of_nodes+1];
+	memset(color, -1, sizeof(color));
+
+	for (int i = 1; i <= num_of_nodes; i++) {
+		if (color[i] == -1) {
+			if (!bipartite(i, adj, color)) return false;
+		}
+	}
+	return true;
 }
 
 int main() {
@@ -41,17 +56,8 @@ int main() {
 		adj[node_edge_2].push_back(node_edge_1);
 	}
 
-	vector<int> vis(num_of_nodes, 0);
-	int cycle = 0;
-
-	for (int i = 1; i <= num_of_nodes; i++) {
-		if (!vis[i]) {
-			if (checkForCycle(i, -1, vis, adj)) cycle = 1;
-		}
-	}
-
-	if (cycle) cout << "There is a cycle!\n";
-	else cout << "There is no cycle!\n";
+	if (checkBipartiteDFS(adj, num_of_nodes)) cout << "This is a Bipartite Graph!\n";
+	else cout << "This is not a Bipartite Graph!\n";
 
 
 	return 0;

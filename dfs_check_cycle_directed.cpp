@@ -7,14 +7,29 @@
 
 using namespace std;
 
-bool checkForCycle(int node, int parent, vector<int>& vis, vector<int> adj[]) {
+bool checkCycle(int node, vector<int> adj[], int vis[], int DFSVis[]) {
 	vis[node] = 1;
+	DFSVis[node] = 1;
+
 	for (auto it: adj[node]) {
 		if (!vis[it]) {
-			if (checkForCycle(it, node, vis, adj)) return true;
-		} else if (it != parent) return true;
+			if (checkCycle(it, adj, vis, DFSVis)) return true;
+		} else if (DFSVis[it]) return true;
 	}
+	DFSVis[node] = 0;
+	return false;
+}
 
+bool isCyclicDFS(int num_of_nodes, vector<int> adj[]) {
+	int vis[num_of_nodes+1], DFSVis[num_of_nodes+1];
+	memset(vis, 0, sizeof(vis));
+	memset(DFSVis, 0, sizeof(DFSVis));
+
+	for (int i = 1; i <= num_of_nodes; i++) {
+		if (!vis[i]) {
+			if (checkCycle(i, adj, vis, DFSVis)) return true;
+		}
+	}
 	return false;
 }
 
@@ -38,19 +53,10 @@ int main() {
 		adj[node_edge_1].push_back(node_edge_2);
 
 		// If it is directed graph, we omit this line
-		adj[node_edge_2].push_back(node_edge_1);
+		// adj[node_edge_2].push_back(node_edge_1);
 	}
 
-	vector<int> vis(num_of_nodes, 0);
-	int cycle = 0;
-
-	for (int i = 1; i <= num_of_nodes; i++) {
-		if (!vis[i]) {
-			if (checkForCycle(i, -1, vis, adj)) cycle = 1;
-		}
-	}
-
-	if (cycle) cout << "There is a cycle!\n";
+	if (isCyclicDFS(num_of_nodes, adj)) cout << "There is a cycle!\n";
 	else cout << "There is no cycle!\n";
 
 
